@@ -16,7 +16,7 @@ BattleShipP2P/
 └── README.md
 ```
 
-> The networked version is under active development.
+> The networked version is under active development
 
 ## How It Works
 
