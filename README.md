@@ -4,7 +4,7 @@ A peer-to-peer networked Battleship game written in C, built on top of an existi
 
 ## Authors
 
-- [Hexscript101](https://github.com/Hexscript101) <!-- sostituisci con il tuo username -->
+- [Hexscript101](https://github.com/Hexscript101) 
 - [Edoelel](https://github.com/Edoelel)
 - [Toothbrush](https://github.com/Toothbrush)
 
@@ -12,7 +12,7 @@ A peer-to-peer networked Battleship game written in C, built on top of an existi
 
 ```
 BattleShipP2P/
-├── original/        # Original local two-player implementation
+├── original/        # Original local two-player implementation and a raw sketch with some ideas
 └── README.md
 ```
 
