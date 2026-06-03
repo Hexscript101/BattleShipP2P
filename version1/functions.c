@@ -16,18 +16,25 @@
 #include <ctype.h>
 #include <unistd.h>
 #include <time.h>
+#include <netinet/in.h>
+
+#include "functions.h"
 
 #define LIM 10
 #define SHIPS_NUM 5
 #define TOTAL_CELLS 16
 #define TYPE2 2
 #define TEMPO 3
+#define PORT 4444
 
-// Colori
+#define OK 0
+#define FAIL -1
+
+// Colors
 #define RESET "\033[0m"
 #define GRAY "\033[90m"
 
-//funzioni di base
+// Base funcs
 void clean_up();
 void init_board(char matr[LIM][LIM]);
 void print_board(char matr[LIM][LIM]);
@@ -38,8 +45,12 @@ void title();
 int check_cell(char matr[LIM][LIM], int riga, int colonna);
 void input(int playerAttaccante);
 void win(int playerVincitore);
+// New network funcs
+int create_socket();
+int set_up_client(int fd,int port, char address[]);
+int set_up_server();
 
-// Variabili globali 
+// Global var
 char esemple[LIM][LIM] =  {0};
 char boardG1M[LIM][LIM] = {0}; // G1M = griglia giocatore 1 principale, dove verranno segnate le navi. S = griglia di appoggio mosse
 char boardG1S[LIM][LIM] = {0};
@@ -329,4 +340,80 @@ void win(int playerVincitore)
 {
     clean_up();
     printf("\n===========Il giocatore %d ha vinto!=============\n", playerVincitore);
+}
+
+// --------------------------------------------------------------------------
+
+// Create a TCP socket for ipv4 connection. To use once for all the game.
+int create_socket()
+{
+    int flag, fd;
+    fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (fd < 0)
+    {
+        flag = FAIL;
+        perror("sock: ");
+    }else{
+        flag = fd;
+    }
+    return flag;
+}
+
+int set_up_client(int fd, int port, char address[])
+{
+    int flag, res;
+
+    // Define the other player info for the connetc() func
+    struct sockaddr_in otherPlayer;
+
+    otherPlayer.sin_family = AF_INET;
+    otherPlayer.sin_port = htons(port);
+    inet_pton(AF_INET, address, &otherPlayer.sin_addr);
+
+    res = connect(fd, (struct sockaddr *)&otherPlayer, sizeof(otherPlayer));
+
+    if (res < 0)
+    {
+       flag = FAIL;
+    }else
+    {
+        flag = OK;
+    }
+    return flag;
+}
+
+
+// Per il server: create_socket()restituisce l'fd del socket in ascolto, quello da passare a bind()/listen(). 
+// Dopo accept() ne avremo uno nuovo, che è quello da usare per tutta la partita e che si passa a protocol()
+
+int set_up_server()
+{
+    int fd,status, listenStatus, fdCon;
+    fd = create_socket();
+
+    struct sockaddr_in server;
+    server.sin_family = AF_INET;
+    server.sin_port = htons(PORT);
+    server.sin_addr.s_addr = INADDR_ANY;
+
+    status = bind(fd, (struct sockaddr *)&server, sizeof(server));
+
+    if(status < 0 ){
+        perror("Bind: ");
+        return FAIL;
+    }
+
+    listenStatus = listen(fd, 1);
+
+    if(listenStatus < 0){
+        perror("Listen: ");
+        return FAIL;
+    }
+
+    printf("Waiting on port %d for the other player to connect...", PORT);
+
+    fdCon = accept(fd, NULL, NULL);
+
+    return fdCon;
+
 }
