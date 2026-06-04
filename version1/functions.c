@@ -347,16 +347,13 @@ void win(int playerVincitore)
 // Create a TCP socket for ipv4 connection. To use once for all the game.
 int create_socket()
 {
-    int flag, fd;
+    int fd;
     fd = socket(AF_INET, SOCK_STREAM, 0);
     if (fd < 0)
     {
-        flag = FAIL;
         perror("sock: ");
-    }else{
-        flag = fd;
     }
-    return flag;
+    return fd;
 }
 
 int set_up_client(int fd, int port, char address[])

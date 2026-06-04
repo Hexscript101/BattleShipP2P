@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
         printf("Bad usage: ./main <mod> ( See the README.md for more info )");
         return FAIL;
     }
-    
+    win(1);
     
     // close all fd pls
     return OK;
