@@ -365,18 +365,11 @@ int set_up_client(int fd, int port, char address[])
 
     otherPlayer.sin_family = AF_INET;
     otherPlayer.sin_port = htons(port);
-    inet_pton(AF_INET, address, &otherPlayer.sin_addr);
+    inet_pton(AF_INET, address, &otherPlayer.sin_addr );
 
     res = connect(fd, (struct sockaddr *)&otherPlayer, sizeof(otherPlayer));
 
-    if (res < 0)
-    {
-       flag = FAIL;
-    }else
-    {
-        flag = OK;
-    }
-    return flag;
+    return res;
 }
 
 
@@ -413,4 +406,17 @@ int set_up_server()
 
     return fdCon;
 
+}
+
+/*
+    send_attack(row, col, fd) — manda le coordinate
+    recv_result(fd) — riceve il risultato
+    recv_attack(fd) — riceve le coordinate dell'avversario
+    send_result(row, col, fd) — manda il risultato
+*/
+
+int send_attack(int row, int colum, int fdCon)
+{
+    char buff[2];
+    
 }
