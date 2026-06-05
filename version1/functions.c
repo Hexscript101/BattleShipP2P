@@ -381,6 +381,7 @@ int set_up_client(int fd, int port, char address[])
 int set_up_server()
 {
     int fd,status, listenStatus, fdCon;
+    printf("\nWaiting on port %d for the other player to connect...\n", PORT);
     fd = create_socket();
 
     struct sockaddr_in server;
@@ -388,26 +389,22 @@ int set_up_server()
     server.sin_port = htons(PORT);
     server.sin_addr.s_addr = INADDR_ANY;
 
+    
     status = bind(fd, (struct sockaddr *)&server, sizeof(server));
 
     if(status < 0 ){
         perror("Bind: ");
         return FAIL;
     }
-
     listenStatus = listen(fd, 1);
 
     if(listenStatus < 0){
         perror("Listen: ");
         return FAIL;
     }
-
-    printf("Waiting on port %d for the other player to connect...", PORT);
-
     fdCon = accept(fd, NULL, NULL);
 
     return fdCon;
-
 }
 
 /*

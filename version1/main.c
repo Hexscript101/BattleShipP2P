@@ -50,7 +50,12 @@ int main(int argc, char *argv[])
     {
         /* If server */
         // Il server sarà sempre il player 1
-        set_up_server();
+        int fdCon = set_up_server();
+        if (fdCon == FAIL)
+        {
+            fprintf(stderr, "SOCK ERROR");
+            return FAIL;
+        }
         title();
     }else if (strcmp(argv[1], "client") == 0)
     {
@@ -65,14 +70,26 @@ int main(int argc, char *argv[])
         getchar();
 
         // Real start 
-        set_up_client(create_socket(), port, address);
+        int fd = create_socket();
+        int res = set_up_client(fd, port, address);
 
+        if (res == FAIL)
+        {
+            perror("sock: ");
+            return FAIL;
+        }
         
     }else{
         printf("Bad usage: ./main <mod> ( See the README.md for more info )");
         return FAIL;
     }
-    win(1);
+    //win(1);
+
+    /*
+    TODO list 
+    - Test di send e recv
+    - loop di gioco e condizioni di vittoria, reference su codebase
+    */
     
     // close all fd pls
     return OK;
