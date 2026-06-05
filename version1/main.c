@@ -37,8 +37,11 @@
 #define RESET "\033[0m"
 #define GRAY "\033[90m"
 
+
 int main(int argc, char *argv[])
 {
+    char address[16];
+    int port;
     if (argc != 2)
     {
         printf("insufficient arguments , closing...\n");
@@ -46,9 +49,25 @@ int main(int argc, char *argv[])
     }else if (strcmp(argv[1], "server") == 0)
     {
         /* If server */
+        // Il server sarà sempre il player 1
+        set_up_server();
+        title();
     }else if (strcmp(argv[1], "client") == 0)
     {
         /* if client */
+        // il client sarà sempre il player 2
+        title();
+        printf("ip address:  (ex 192.169.1.1): \n>");
+        fgets(address, sizeof(address), stdin);
+        address[strcspn(address, "\n")] = '\0';
+        printf("Port: \n>");
+        scanf("%d", &port);
+        getchar();
+
+        // Real start 
+        set_up_client(create_socket(), port, address);
+
+        
     }else{
         printf("Bad usage: ./main <mod> ( See the README.md for more info )");
         return FAIL;

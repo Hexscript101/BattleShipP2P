@@ -49,6 +49,8 @@ void win(int playerVincitore);
 int create_socket();
 int set_up_client(int fd,int port, char address[]);
 int set_up_server();
+int send_attack(int row, int colum, int fdCon);
+int recv_char(int fdCon);
 
 // Global var
 char esemple[LIM][LIM] =  {0};
@@ -275,7 +277,7 @@ void gen_ships(char matr[LIM][LIM])
 void title()
 {
     printf("==================================================\n\n");
-    printf("                Battaglia navale v1.0.0                     \n");
+    printf("                Battaglia navale v2.1.0                     \n");
     printf("==================================================\n\n");
     printf("Nota: Giocherai in una griglia 10x10 con a disposizone: \n\t-2 Fregate\n\t-1 Sottomarino\n\t-1 Corazzata\n\t-1 Portaaerei \n\n");
 }
@@ -417,6 +419,37 @@ int set_up_server()
 
 int send_attack(int row, int colum, int fdCon)
 {
-    char buff[2];
-    
+    int flag;
+    char crow = (char)row;
+    char ccolum = (char)colum;
+
+    int s1 = send(fdCon, &crow, sizeof(crow), 0);
+    int s2 = send(fdCon, &ccolum, sizeof(ccolum), 0);
+
+    if (s1 > 0 && s2 > 0)
+    {
+        flag = OK;
+    }else{
+        flag = FAIL;
+    }
+    return flag;
+}
+
+// Take a generic char ( rows or colums ), store it in a var, converts it and returns it
+int recv_char(int fdCon)
+{
+    char chFromNet;
+    int flag;
+
+    int recved = recv(fdCon, &chFromNet, sizeof(chFromNet), 0);
+
+    int dataFromNet = (int)chFromNet;
+
+    if (recved > 0)
+    {
+        flag = dataFromNet;
+    }else{
+        flag = recved;
+    }
+    return flag;
 }

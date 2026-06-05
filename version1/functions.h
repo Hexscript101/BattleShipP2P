@@ -15,4 +15,6 @@ void win(int playerVincitore);
 int create_socket();
 int set_up_client(int fd,int port, char address[]);
 int set_up_server();
+int send_attack(int row, int colum, int fdCon);
+int recv_char(int fdCon);
 
