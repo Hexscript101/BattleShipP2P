@@ -354,6 +354,7 @@ int create_socket()
     if (fd < 0)
     {
         perror("sock: ");
+        return FAIL;
     }
     return fd;
 }
@@ -414,11 +415,14 @@ int set_up_server()
     send_result(row, col, fd) — manda il risultato
 */
 
-int send_attack(int row, int colum, int fdCon)
+//Takes two int, convert them in char and send them to the other player 
+int send_attack(int row, int colum, int fdCon)  // --> returs error or OK code 
 {
     int flag;
     char crow = (char)row;
     char ccolum = (char)colum;
+
+    printf("Sending attack...");
 
     int s1 = send(fdCon, &crow, sizeof(crow), 0);
     int s2 = send(fdCon, &ccolum, sizeof(ccolum), 0);
@@ -433,10 +437,12 @@ int send_attack(int row, int colum, int fdCon)
 }
 
 // Take a generic char ( rows or colums ), store it in a var, converts it and returns it
-int recv_char(int fdCon)
+int recv_char(int fdCon) // --> return code error if error and the data receved if OK
 {
     char chFromNet;
     int flag;
+
+    printf("Receving response...");
 
     int recved = recv(fdCon, &chFromNet, sizeof(chFromNet), 0);
 

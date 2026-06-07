@@ -57,6 +57,10 @@ int main(int argc, char *argv[])
             return FAIL;
         }
         title();
+        printf("In ricezione...\n");
+        int row = recv_char(fdCon);
+        int c = recv_char(fdCon);
+        printf("Coordinate rivevute: riga : %d colonna : %d", row, c);
     }else if (strcmp(argv[1], "client") == 0)
     {
         /* if client */
@@ -72,11 +76,20 @@ int main(int argc, char *argv[])
         // Real start 
         int fd = create_socket();
         int res = set_up_client(fd, port, address);
-
         if (res == FAIL)
         {
             perror("sock: ");
             return FAIL;
+        }
+
+        int temp;
+        printf("Lanch");
+        scanf("%d", &temp);
+
+        int atk = send_attack(9, 8, fd);
+        if (atk == FAIL)
+        {
+            fprintf(stderr, "ERRORE ATK");
         }
         
     }else{
