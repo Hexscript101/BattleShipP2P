@@ -37,11 +37,25 @@
 #define RESET "\033[0m"
 #define GRAY "\033[90m"
 
+// Global var
+char esemple[LIM][LIM] =  {0};
+char boardG1M[LIM][LIM] = {0}; // G1M = griglia giocatore 1 principale, dove verranno segnate le navi. S = griglia di appoggio mosse
+char boardG1S[LIM][LIM] = {0};
+char boardG2M[LIM][LIM] = {0};
+char boardG2S[LIM][LIM] = {0};
+char direzioni[4] = {'A', 'V', '<', '>'}; 
+
+int celleRimanentiG1 = TOTAL_CELLS;
+int celleRimanentiG2 = TOTAL_CELLS;
+int scoreG1 = 0;
+int scoreG2 = 0;
+
 
 int main(int argc, char *argv[])
 {
     char address[16];
     int port;
+    int player = 1;
     if (argc != 2)
     {
         printf("insufficient arguments , closing...\n");
@@ -57,10 +71,16 @@ int main(int argc, char *argv[])
             return FAIL;
         }
         title();
-        printf("In ricezione...\n");
-        int row = recv_char(fdCon);
-        int c = recv_char(fdCon);
-        printf("Coordinate rivevute: riga : %d colonna : %d", row, c);
+        // GAME
+        // non visible prep
+        init_board(boardG1M);
+        memset(boardG1S, '?', sizeof(boardG1S));
+        gen_ships(boardG1M);
+        
+
+        // GAME LOOP --------------------------------- 
+        
+        
     }else if (strcmp(argv[1], "client") == 0)
     {
         /* if client */
@@ -82,25 +102,20 @@ int main(int argc, char *argv[])
             return FAIL;
         }
 
-        int temp;
-        printf("Lanch");
-        scanf("%d", &temp);
+        // GAME
+        // non visible prep
+        init_board(boardG2M);
+        memset(boardG2S, '?', sizeof(boardG2S));
+        gen_ships(boardG2M);
 
-        int atk = send_attack(9, 8, fd);
-        if (atk == FAIL)
-        {
-            fprintf(stderr, "ERRORE ATK");
-        }
         
     }else{
         printf("Bad usage: ./main <mod> ( See the README.md for more info )");
         return FAIL;
     }
-    //win(1);
 
     /*
     TODO list 
-    - Test di send e recv
     - loop di gioco e condizioni di vittoria, reference su codebase
     */
     

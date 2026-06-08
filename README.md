@@ -45,9 +45,9 @@ The game uses a minimal peer-to-peer architecture over TCP:
 | Component | Status |
 |---|---|
 | Local two-player game | ✅ Complete |
-| TCP connection setup | 🔄 In progress |
-| Network protocol | 🔄 In progress |
-| Turn management | ⏳ Planned |
+| TCP connection setup | ✅ Complete  |
+| Network protocol | ✅ Complete |
+| Turn management | 🔄 In progress |
 
 ## License
 

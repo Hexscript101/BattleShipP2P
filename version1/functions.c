@@ -292,7 +292,6 @@ void input(int playerAttaccante)
     int riga,colonna,ris;
     do
     {
-        printf("Sistemi d'arma pronti a fare fuoco\n");
         printf("Inserire coordinata riga ( Partendo da 1 ):\n");
         scanf("%d", &riga);
         riga--;
@@ -456,3 +455,16 @@ int recv_char(int fdCon) // --> return code error if error and the data receved 
     }
     return flag;
 }
+
+int game_loop(int player) // --> return code : 0 if in progress, 1 if player 1 wins, 2 if player 2 wins.
+{
+    if (player == 1)
+    {
+        print_board(boardG1M);
+        print_board(boardG1S);
+    }
+    
+}
+
+
+// main --> loop --> inputModificate --> send(); 
