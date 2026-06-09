@@ -53,9 +53,11 @@ int scoreG2 = 0;
 
 int main(int argc, char *argv[])
 {
+    srand(time(NULL));
     char address[16];
-    int port;
-    int player = 1;
+    int port, exitCode;
+    int turno = 1;
+    int winner;
     if (argc != 2)
     {
         printf("insufficient arguments , closing...\n");
@@ -79,6 +81,9 @@ int main(int argc, char *argv[])
         
 
         // GAME LOOP --------------------------------- 
+        winner = game_loop(1, fdCon);
+        win(winner);
+        close(fdCon);
         
         
     }else if (strcmp(argv[1], "client") == 0)
@@ -108,18 +113,14 @@ int main(int argc, char *argv[])
         memset(boardG2S, '?', sizeof(boardG2S));
         gen_ships(boardG2M);
 
+        winner = game_loop(2, fd);
+        win(winner);
+        close(fd);
         
     }else{
         printf("Bad usage: ./main <mod> ( See the README.md for more info )");
         return FAIL;
     }
-
-    /*
-    TODO list 
-    - loop di gioco e condizioni di vittoria, reference su codebase
-    */
-    
-    // close all fd pls
     return OK;
 }
 

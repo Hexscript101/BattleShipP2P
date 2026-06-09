@@ -1,10 +1,14 @@
 /*
--   funzioni di rete:
-        -   connect
-        -   listen
-        -   protocollo
+    Authors: Luchetta Fabio, Leonardo Golisano, Edoardo Trifone
+    Start date : 3/06/2026
+    Explanation: A peer-to-peer networked Battleship game written in C, 
+    built on top of an existing local two-player implementation. 
+    Two machines connect over TCP and play against each other — each client manages its own game state locally, 
+    exchanging only attack coordinates and hit results over the network.
+    Useful links: https://github.com/Hexscript101/BattleShipP2P
 */
 
+// Libraries
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <stdio.h>
@@ -16,15 +20,14 @@
 #include <ctype.h>
 #include <unistd.h>
 #include <time.h>
-#include <netinet/in.h>
 
-#include "functions.h"
 
-#define LIM 10
-#define SHIPS_NUM 5
-#define TOTAL_CELLS 16
-#define TYPE2 2
-#define TEMPO 3
+// Constants
+#define LIM 10          // Limit of the game board
+#define SHIPS_NUM 5     // Number of ships
+#define TOTAL_CELLS 16  // Sum of the cells of all ships
+#define TYPE2 2         // Number of the ships made by 2 cell 
+#define TEMPO 3         //? Da tenere ? 
 #define PORT 4444
 
 #define OK 0
@@ -33,26 +36,6 @@
 // Colors
 #define RESET "\033[0m"
 #define GRAY "\033[90m"
-
-// Base funcs
-void clean_up();
-void init_board(char matr[LIM][LIM]);
-void print_board(char matr[LIM][LIM]);
-void place_type2(char matr[LIM][LIM]);
-void place_other(char matr[LIM][LIM], int dimShip);
-void gen_ships(char matr[LIM][LIM]);
-void title();
-int check_cell(char matr[LIM][LIM], int riga, int colonna);
-void input(int playerAttaccante);
-void win(int playerVincitore);
-// New network funcs
-int create_socket();
-int set_up_client(int fd,int port, char address[]);
-int set_up_server();
-int send_attack(int row, int colum, int fdCon);
-int recv_char(int fdCon);
-int send_status(int PersonalFD, int ris);
-int game_loop(int player, int PersonalFD);
 
 // Global var
 char esemple[LIM][LIM] =  {0};
@@ -66,7 +49,6 @@ int celleRimanentiG1 = TOTAL_CELLS;
 int celleRimanentiG2 = TOTAL_CELLS;
 int scoreG1 = 0;
 int scoreG2 = 0;
-
 void clean_up()
 {
         system("clear");
@@ -584,20 +566,75 @@ int game_loop(int player, int PersonalFD) // --> return code : 0 if in progress,
     
 }
 
-/*
+int main(int argc, char *argv[])
+{
+    srand(time(NULL));
+    char address[16];
+    int port, exitCode;
+    int turno = 1;
+    int winner;
+    if (argc != 2)
+    {
+        printf("insufficient arguments , closing...\n");
+        return FAIL;
+    }else if (strcmp(argv[1], "server") == 0)
+    {
+        /* If server */
+        // Il server sarà sempre il player 1
+        int fdCon = set_up_server();
+        if (fdCon == FAIL)
+        {
+            fprintf(stderr, "SOCK ERROR");
+            return FAIL;
+        }
+        title();
+        // GAME
+        // non visible prep
+        init_board(boardG1M);
+        memset(boardG1S, '?', sizeof(boardG1S));
+        gen_ships(boardG1M);
+        
 
-    Chi attacca:
+        // GAME LOOP --------------------------------- 
+        winner = game_loop(1, fdCon);
+        win(winner);
+        close(fdCon);
+        
+        
+    }else if (strcmp(argv[1], "client") == 0)
+    {
+        /* if client */
+        // il client sarà sempre il player 2
+        title();
+        printf("ip address:  (ex 192.169.1.1): \n>");
+        fgets(address, sizeof(address), stdin);
+        address[strcspn(address, "\n")] = '\0';
+        printf("Port: \n>");
+        scanf("%d", &port);
+        getchar();
 
-Prende le coordinate in input
-send_attack()
-recv_char() — aspetta lo status dall'avversario
-Aggiorna la propria board di supporto in base allo status ricevuto
+        // Real start 
+        int fd = create_socket();
+        int res = set_up_client(fd, port, address);
+        if (res == FAIL)
+        {
+            perror("sock: ");
+            return FAIL;
+        }
 
-Chi difende:
+        // GAME
+        // non visible prep
+        init_board(boardG2M);
+        memset(boardG2S, '?', sizeof(boardG2S));
+        gen_ships(boardG2M);
 
-recv_char() due volte — riceve le coordinate
-check_cell() sulla propria board principale
-send_status() — manda il risultato
-Aggiorna la propria board principale
-
-*/
+        winner = game_loop(2, fd);
+        win(winner);
+        close(fd);
+        
+    }else{
+        printf("Bad usage: ./main <mod> ( See the README.md for more info )");
+        return FAIL;
+    }
+    return OK;
+}

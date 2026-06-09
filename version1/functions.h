@@ -17,4 +17,5 @@ int set_up_client(int fd,int port, char address[]);
 int set_up_server();
 int send_attack(int row, int colum, int fdCon);
 int recv_char(int fdCon);
-
+int send_status(int PersonalFD, int ris);
+int game_loop(int player, int PersonalFD);
