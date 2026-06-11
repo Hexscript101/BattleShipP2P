@@ -27,7 +27,7 @@
 #define SHIPS_NUM 5     // Number of ships
 #define TOTAL_CELLS 16  // Sum of the cells of all ships
 #define TYPE2 2         // Number of the ships made by 2 cell 
-#define TEMPO 3         //? Da tenere ? 
+#define TEMPO 6         //? Da tenere ? 
 #define PORT 4444
 
 #define OK 0
@@ -271,56 +271,6 @@ int check_cell(char matr[LIM][LIM], int riga, int colonna)
     return (matr[riga][colonna] == '~') ? 0 : 1;
 }
 
-void input(int playerAttaccante)
-{
-    int riga,colonna,ris;
-    do
-    {
-        printf("Inserire coordinata riga ( Partendo da 1 ):\n");
-        scanf("%d", &riga);
-        riga--;
-        printf("Inserire coordinata colonna ( Partendo da 1 ):\n");
-        scanf("%d", &colonna);
-        colonna--;
-    } while (riga < 0 || riga >10 || colonna < 0 || colonna > 10);
-    
-    if (playerAttaccante == 1)
-    {
-        ris = check_cell(boardG2M, riga,colonna);
-
-        if (ris == 0)
-        {
-            boardG1S[riga][colonna] = 'O';
-            printf("Mancato!\n");
-        }else
-        {
-            boardG1S[riga][colonna] = 'X';  // Aggiorno tabellone di supporto di chi attacca
-            boardG2M[riga][colonna] = 'X'; // Aggiorno tabellone principale di chi viene attaccato
-            scoreG1++;
-            celleRimanentiG2--;
-            printf("Colpito!\n");
-        }
-        
-    }
-    else // Attacca giocatore 2
-    {
-       ris = check_cell(boardG1M, riga,colonna);
-
-        if (ris == 0)
-        {
-            boardG2S[riga][colonna] = 'O';
-            printf("Mancato!\n");
-        }else
-        {
-            boardG2S[riga][colonna] = 'X';  // Attaccante segna sul supporto
-            boardG1M[riga][colonna] = 'X';  // Attaccato viene segnato sul principale
-            scoreG2++;
-            celleRimanentiG1--;
-            printf("Colpito!\n");
-        } 
-    }
-}
-
 void win(int playerVincitore)
 {
     clean_up();
@@ -398,7 +348,7 @@ int send_attack(int row, int colum, int fdCon)  // --> returs error or OK code
     char crow = (char)row;
     char ccolum = (char)colum;
 
-    printf("Sending attack...");
+    printf("\nSending attack...\n");
 
     int s1 = send(fdCon, &crow, sizeof(crow), 0);
     int s2 = send(fdCon, &ccolum, sizeof(ccolum), 0);
@@ -418,10 +368,10 @@ int recv_char(int fdCon) // --> return code error if error and the data receved 
     char chFromNet;
     int flag;
 
-    printf("Receving response...");
+    printf("\nReceving response...\n");
 
     int recved = recv(fdCon, &chFromNet, sizeof(chFromNet), 0);
-
+    fprintf(stderr, "recved: %d, char: %d\n", recved, (int)chFromNet); //? Test
     int dataFromNet = (int)chFromNet;
 
     if (recved > 0)
@@ -433,32 +383,11 @@ int recv_char(int fdCon) // --> return code error if error and the data receved 
     return flag;
 }
 
-// Takes the two coordinate from the user and it pass them to sendattack()
-void take_param(int fd)
-{
-    int row, colum;
-
-    do
-    {
-        printf("Insert the row (1 - 10 ): \n>");
-        scanf("%d", &row);
-        printf("Insert the colum ( 1 - 10 ): \n>");
-        scanf("%d", &colum);
-    } while ((row < 0 || row > 10) && (colum < 0 || colum > 10));
-    int check = send_attack(row, colum, fd);
-    if (check == FAIL)
-    {
-        perror("Problems with the \"send_attack\" func: " );
-    }
-    
-}
-
 int send_status(int PersonalFD, int ris)
 {
-    int flag;
-    char risS = (char)ris;
+    char risChar = (char)ris;
 
-    int check = send(PersonalFD, &ris, sizeof(ris),0);
+    int check = send(PersonalFD, &risChar, sizeof(risChar),0);
 
     if (check == FAIL)
     {
@@ -472,20 +401,28 @@ int game_loop(int player, int PersonalFD) // --> return code : 0 if in progress,
     int turno = 1;
     while (celleRimanentiG1 != 0 && celleRimanentiG2 != 0)
     {
+        sleep(TEMPO);
         if (player == 1 && (turno % 2 == 1)) // Server attacks
         {
+
+            printf("turno: %d\n", turno);
+
+            //clean_up();
             int row, colum;
+            print_board(boardG1M);
+            printf("\n-------------------------------------\n");
+            print_board(boardG1S);
             do // taking input
             {
-                printf("Insert the row (1 - 10 ): \n>");
+                printf("\nInsert the row (1 - 10 ): \n>");
                 scanf("%d", &row);
-                printf("Insert the colum ( 1 - 10 ): \n>");
+                printf("\nInsert the colum ( 1 - 10 ): \n>");
                 scanf("%d", &colum);
             } while ((row < 0 || row > 10) || (colum < 0 || colum > 10));
-            int check = send_attack(row, colum, PersonalFD);
+            int check = send_attack(row-1, colum-1, PersonalFD);
             if (check == FAIL)
             {   
-                perror("Problems with the \"send_attack\" func: " );
+                perror("\nProblems with the \"send_attack\" func: " );
             }
             int ris = (recv_char(PersonalFD));
 
@@ -494,6 +431,7 @@ int game_loop(int player, int PersonalFD) // --> return code : 0 if in progress,
                 printf("\nWater!\n");
                 boardG1S[row][colum] = 'O';
             }else{
+                printf("\nHit!\n");
                 boardG1S[row][colum] = 'X';
                 scoreG1++;
                 celleRimanentiG2--;
@@ -502,6 +440,8 @@ int game_loop(int player, int PersonalFD) // --> return code : 0 if in progress,
         }
         else if(player == 1 && (turno % 2 == 0)) // Server "defends"
         {
+            printf("turno: %d\n", turno);
+
             int row = recv_char(PersonalFD);
             int colum = recv_char(PersonalFD);
             
@@ -510,23 +450,35 @@ int game_loop(int player, int PersonalFD) // --> return code : 0 if in progress,
             {
                 boardG1M[row][colum] = 'X';
             }
-            send_status(PersonalFD, ris);
-            turno++;
+            int status_send = send_status(PersonalFD, ris);
+            if (status_send > 0)
+            {
+                printf("\nMANDO %d byte STATO\n", status_send);
+                turno++;
+            }
+            
+            
         }
-        else if(player == 2 && (turno % 2 == 1)) // client attacks
+        else if(player == 2 && (turno % 2 == 0)) // client attacks
         {
+            printf("turno: %d\n", turno);
+
+            //clean_up();
             int row,colum;
+            print_board(boardG2M);
+            printf("\n-------------------------------------\n");
+            print_board(boardG2S);
             do // taking input
             {
-                printf("Insert the row (1 - 10 ): \n>");
+                printf("\nInsert the row (1 - 10 ): \n>");
                 scanf("%d", &row);
-                printf("Insert the colum ( 1 - 10 ): \n>");
+                printf("\nInsert the colum ( 1 - 10 ): \n>");
                 scanf("%d", &colum);
             } while ((row < 0 || row > 10) || (colum < 0 || colum > 10));
-            int check = send_attack(row, colum, PersonalFD);
+            int check = send_attack(row-1, colum-1, PersonalFD);
             if (check == FAIL)
             {   
-                perror("Problems with the \"send_attack\" func: " );
+                perror("\nProblems with the \"send_attack\" func: " );
             }
             int ris = (recv_char(PersonalFD));
             if (ris == 0)
@@ -534,14 +486,20 @@ int game_loop(int player, int PersonalFD) // --> return code : 0 if in progress,
                 printf("\nWater!\n");
                 boardG2S[row][colum] = 'O';
             }else{
+                printf("\nHit!\n");
                 boardG2S[row][colum] = 'X';
                 scoreG2++;
                 celleRimanentiG1--;
             }
             turno++;
         }
-        else{  // client "defends"
+        else if (player == 2 && (turno % 2 == 1))
+        
+        {  // client "defends"
+            printf("turno: %d\n", turno);
 
+            fflush(stdout);
+            printf("\nWaiting coordinates...\n");
             int row = recv_char(PersonalFD);
             int colum = recv_char(PersonalFD);
             
@@ -550,8 +508,12 @@ int game_loop(int player, int PersonalFD) // --> return code : 0 if in progress,
             {
                 boardG2M[row][colum] = 'X';
             }
-            send_status(PersonalFD, ris);
-            turno++;
+            int status_send = send_status(PersonalFD, ris);
+            if (status_send > 0)
+            {
+                printf("\nMANDO %d byte STATO\n", status_send);
+                turno++;
+            }
         }
         
     }

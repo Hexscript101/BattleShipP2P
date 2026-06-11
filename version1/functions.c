@@ -440,6 +440,7 @@ int recv_char(int fdCon) // --> return code error if error and the data receved 
 
     int recved = recv(fdCon, &chFromNet, sizeof(chFromNet), 0);
 
+    fprintf(strerror, "recved: %d, char: %d\n", recved, (int)chFromNet); //? Test
     int dataFromNet = (int)chFromNet;
 
     if (recved > 0)
