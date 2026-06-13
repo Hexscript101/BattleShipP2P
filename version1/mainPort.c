@@ -27,7 +27,7 @@
 #define SHIPS_NUM 5     // Number of ships
 #define TOTAL_CELLS 16  // Sum of the cells of all ships
 #define TYPE2 2         // Number of the ships made by 2 cell 
-#define TEMPO 6         //? Da tenere ? 
+#define TEMPO 6         
 #define PORT 4444
 
 #define OK 0
@@ -371,7 +371,7 @@ int recv_char(int fdCon) // --> return code error if error and the data receved 
     printf("\nReceving response...\n");
 
     int recved = recv(fdCon, &chFromNet, sizeof(chFromNet), 0);
-    fprintf(stderr, "recved: %d, char: %d\n", recved, (int)chFromNet); //? Test
+    fprintf(stderr, "recved: %d, char: %d\n", recved, (int)chFromNet); //? Debug
     int dataFromNet = (int)chFromNet;
 
     if (recved > 0)
@@ -401,25 +401,29 @@ int game_loop(int player, int PersonalFD) // --> return code : 0 if in progress,
     int turno = 1;
     while (celleRimanentiG1 != 0 && celleRimanentiG2 != 0)
     {
+
         sleep(TEMPO);
+        clean_up();
         if (player == 1 && (turno % 2 == 1)) // Server attacks
         {
 
             printf("turno: %d\n", turno);
 
-            //clean_up();
             int row, colum;
+            printf("\n-----------------YOUR SHIPS-----------------\n\n");
             print_board(boardG1M);
-            printf("\n-------------------------------------\n");
+            printf("\n--------------YOUR PREVIOUS MOVE--------------\n\n");
             print_board(boardG1S);
             do // taking input
             {
                 printf("\nInsert the row (1 - 10 ): \n>");
                 scanf("%d", &row);
+                row--;
                 printf("\nInsert the colum ( 1 - 10 ): \n>");
                 scanf("%d", &colum);
+                colum--;
             } while ((row < 0 || row > 10) || (colum < 0 || colum > 10));
-            int check = send_attack(row-1, colum-1, PersonalFD);
+            int check = send_attack(row, colum, PersonalFD);
             if (check == FAIL)
             {   
                 perror("\nProblems with the \"send_attack\" func: " );
@@ -453,7 +457,7 @@ int game_loop(int player, int PersonalFD) // --> return code : 0 if in progress,
             int status_send = send_status(PersonalFD, ris);
             if (status_send > 0)
             {
-                printf("\nMANDO %d byte STATO\n", status_send);
+                //printf("\nMANDO %d byte STATO\n", status_send);  //? Debug
                 turno++;
             }
             
@@ -463,19 +467,21 @@ int game_loop(int player, int PersonalFD) // --> return code : 0 if in progress,
         {
             printf("turno: %d\n", turno);
 
-            //clean_up();
             int row,colum;
+            printf("\n-----------------YOUR SHIPS-----------------\n\n");
             print_board(boardG2M);
-            printf("\n-------------------------------------\n");
+            printf("\n--------------YOUR PREVIOUS MOVE--------------\n\n");
             print_board(boardG2S);
             do // taking input
             {
                 printf("\nInsert the row (1 - 10 ): \n>");
                 scanf("%d", &row);
+                row--;
                 printf("\nInsert the colum ( 1 - 10 ): \n>");
                 scanf("%d", &colum);
+                colum--;
             } while ((row < 0 || row > 10) || (colum < 0 || colum > 10));
-            int check = send_attack(row-1, colum-1, PersonalFD);
+            int check = send_attack(row, colum, PersonalFD);
             if (check == FAIL)
             {   
                 perror("\nProblems with the \"send_attack\" func: " );
@@ -511,7 +517,7 @@ int game_loop(int player, int PersonalFD) // --> return code : 0 if in progress,
             int status_send = send_status(PersonalFD, ris);
             if (status_send > 0)
             {
-                printf("\nMANDO %d byte STATO\n", status_send);
+                //printf("\nMANDO %d byte STATO\n", status_send);  //? Debug
                 turno++;
             }
         }
@@ -525,7 +531,7 @@ int game_loop(int player, int PersonalFD) // --> return code : 0 if in progress,
     }else{
         winner = 1;
     }
-    
+    return winner;
 }
 
 int main(int argc, char *argv[])
