@@ -14,8 +14,7 @@ int main(int argc, char *argv[])
 {
     srand(time(NULL));
     char address[16];
-    int port, exitCode;
-    int turno = 1;
+    int port;
     int winner;
     if (argc != 2)
     {

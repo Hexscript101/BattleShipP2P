@@ -133,7 +133,7 @@ void place_other(char matr[LIM][LIM], int dimShip)
 
 
             // Controllo in verticale tutte le celle per tutta la lunghezza della nave
-            for (size_t i = IpoR; i <= (IpoR+dimShip); i++)
+            for (int i = IpoR; i <= (IpoR+dimShip); i++)
             {
                 if(matr[i][IpoC] != '~'){
                     flag = 1;
@@ -143,7 +143,7 @@ void place_other(char matr[LIM][LIM], int dimShip)
 
         matr[IpoR][IpoC] = 'A';
         // Ciclo per assegnare dinamicamente le posizioni
-        for (size_t i = IpoR+1; i < (IpoR+dimShip); i++)
+        for (int i = IpoR+1; i < (IpoR+dimShip); i++)
             {
                 matr[i][IpoC] = '+';
             }
@@ -179,7 +179,7 @@ void place_other(char matr[LIM][LIM], int dimShip)
                 IpoR = rand() % 9;
                 IpoC = rand() % max;
 
-                for (size_t i = IpoC; i <= (IpoC+dimShip); i++)
+                for (int i = IpoC; i <= (IpoC+dimShip); i++)
                 {
                     if(matr[IpoR][i] != '~'){
                         flag = 1;
@@ -189,7 +189,7 @@ void place_other(char matr[LIM][LIM], int dimShip)
 
             matr[IpoR][IpoC] = '<';
 
-            for (size_t i = IpoC+1; i < (IpoC+dimShip); i++)
+            for (int i = IpoC+1; i < (IpoC+dimShip); i++)
             {
                 matr[IpoR][i] = '+';
             }
@@ -235,9 +235,9 @@ void gen_ships(char matr[LIM][LIM])
 void title()
 {
     printf("==================================================\n\n");
-    printf("                Battaglia navale v2.1.0                     \n");
+    printf("                Battle ship v2.1.0                     \n");
     printf("==================================================\n\n");
-    printf("Nota: Giocherai in una griglia 10x10 con a disposizone: \n\t-2 Fregate\n\t-1 Sottomarino\n\t-1 Corazzata\n\t-1 Portaaerei \n\n");
+    printf("Each player gets a randomly placed fleet on a 10×10 grid with: \n\t-2 Frigates\n\t-1 Submarine\n\t-1 Battleship\n\t-1 Aircarrier \n\n");
 }
 
 int check_cell(char matr[LIM][LIM], int riga, int colonna)
@@ -248,7 +248,7 @@ int check_cell(char matr[LIM][LIM], int riga, int colonna)
 void win(int playerVincitore)
 {
     clean_up();
-    printf("\n===========Il giocatore %d ha vinto!=============\n", playerVincitore);
+    printf("\n===========Player %d has won!=============\n", playerVincitore);
 }
 
 // --------------------------------------------------------------------------
@@ -268,7 +268,7 @@ int create_socket()
 
 int set_up_client(int fd, int port, char address[])
 {
-    int flag, res;
+    int res;
 
     // Define the other player info for the connetc() func
     struct sockaddr_in otherPlayer;

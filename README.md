@@ -46,7 +46,15 @@ Or, for the modular version:
 ```bash
 gcc -std=c99 -o battleship main.c functions.c
 ```
- 
+
+### Makefile:
+```bash
+make
+```
+then:
+```bash
+./battleship <mod>
+```
 ## Usage
  
 **Player 1 — Server** (launches first, waits for connection on port `4444`):
