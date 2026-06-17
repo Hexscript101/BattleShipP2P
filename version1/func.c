@@ -1,54 +1,14 @@
 /*
--   funzioni di rete:
-        -   connect
-        -   listen
-        -   protocollo
+    Authors: Luchetta Fabio
+    Start date : 3/06/2026
+    Explanation: A peer-to-peer networked Battleship game written in C, 
+    built on top of an existing local two-player implementation. 
+    Two machines connect over TCP and play against each other — each client manages its own game state locally, 
+    exchanging only attack coordinates and hit results over the network.
+    Useful links: https://github.com/Hexscript101/BattleShipP2P
 */
 
-#include <unistd.h>
-#include <arpa/inet.h>
-#include <stdio.h>
-#include <sys/socket.h>
-#include <stdio.h>
-#include <stdbool.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-#include <unistd.h>
-#include <time.h>
-#include <netinet/in.h>
-
 #include "functions.h"
-
-#define LIM 10
-#define SHIPS_NUM 5
-#define TOTAL_CELLS 16
-#define TYPE2 2
-#define TEMPO 3
-#define PORT 4444
-
-#define OK 0
-#define FAIL -1
-
-// Colors
-#define RESET "\033[0m"
-#define GRAY "\033[90m"
-
-// Base funcs
-void clean_up();
-void init_board(char matr[LIM][LIM]);
-void print_board(char matr[LIM][LIM]);
-void place_type2(char matr[LIM][LIM]);
-void place_other(char matr[LIM][LIM], int dimShip);
-void gen_ships(char matr[LIM][LIM]);
-void title();
-int check_cell(char matr[LIM][LIM], int riga, int colonna);
-void input(int playerAttaccante);
-void win(int playerVincitore);
-// New network funcs
-int create_socket();
-int set_up_client(int fd,int port, char address[]);
-int set_up_server();
 
 // Global var
 char esemple[LIM][LIM] =  {0};
@@ -56,7 +16,7 @@ char boardG1M[LIM][LIM] = {0}; // G1M = griglia giocatore 1 principale, dove ver
 char boardG1S[LIM][LIM] = {0};
 char boardG2M[LIM][LIM] = {0};
 char boardG2S[LIM][LIM] = {0};
-char direzioni[4] = {'A', 'V', '<', '>'}; 
+char direzioni[4] = {'A', 'V', '<', '>'};
 
 int celleRimanentiG1 = TOTAL_CELLS;
 int celleRimanentiG2 = TOTAL_CELLS;
@@ -275,7 +235,7 @@ void gen_ships(char matr[LIM][LIM])
 void title()
 {
     printf("==================================================\n\n");
-    printf("                Battaglia navale v1.0.0                     \n");
+    printf("                Battaglia navale v2.1.0                     \n");
     printf("==================================================\n\n");
     printf("Nota: Giocherai in una griglia 10x10 con a disposizone: \n\t-2 Fregate\n\t-1 Sottomarino\n\t-1 Corazzata\n\t-1 Portaaerei \n\n");
 }
@@ -283,57 +243,6 @@ void title()
 int check_cell(char matr[LIM][LIM], int riga, int colonna)
 {
     return (matr[riga][colonna] == '~') ? 0 : 1;
-}
-
-void input(int playerAttaccante)
-{
-    int riga,colonna,ris;
-    do
-    {
-        printf("Sistemi d'arma pronti a fare fuoco\n");
-        printf("Inserire coordinata riga ( Partendo da 1 ):\n");
-        scanf("%d", &riga);
-        riga--;
-        printf("Inserire coordinata colonna ( Partendo da 1 ):\n");
-        scanf("%d", &colonna);
-        colonna--;
-    } while (riga < 0 || riga >10 || colonna < 0 || colonna > 10);
-    
-    if (playerAttaccante == 1)
-    {
-        ris = check_cell(boardG2M, riga,colonna);
-
-        if (ris == 0)
-        {
-            boardG1S[riga][colonna] = 'O';
-            printf("Mancato!\n");
-        }else
-        {
-            boardG1S[riga][colonna] = 'X';  // Aggiorno tabellone di supporto di chi attacca
-            boardG2M[riga][colonna] = 'X'; // Aggiorno tabellone principale di chi viene attaccato
-            scoreG1++;
-            celleRimanentiG2--;
-            printf("Colpito!\n");
-        }
-        
-    }
-    else // Attacca giocatore 2
-    {
-       ris = check_cell(boardG1M, riga,colonna);
-
-        if (ris == 0)
-        {
-            boardG2S[riga][colonna] = 'O';
-            printf("Mancato!\n");
-        }else
-        {
-            boardG2S[riga][colonna] = 'X';  // Attaccante segna sul supporto
-            boardG1M[riga][colonna] = 'X';  // Attaccato viene segnato sul principale
-            scoreG2++;
-            celleRimanentiG1--;
-            printf("Colpito!\n");
-        } 
-    }
 }
 
 void win(int playerVincitore)
@@ -352,6 +261,7 @@ int create_socket()
     if (fd < 0)
     {
         perror("sock: ");
+        return FAIL;
     }
     return fd;
 }
@@ -379,6 +289,7 @@ int set_up_client(int fd, int port, char address[])
 int set_up_server()
 {
     int fd,status, listenStatus, fdCon;
+    printf("\nWaiting on port %d for the other player to connect...\n", PORT);
     fd = create_socket();
 
     struct sockaddr_in server;
@@ -386,24 +297,213 @@ int set_up_server()
     server.sin_port = htons(PORT);
     server.sin_addr.s_addr = INADDR_ANY;
 
+    
     status = bind(fd, (struct sockaddr *)&server, sizeof(server));
 
     if(status < 0 ){
         perror("Bind: ");
         return FAIL;
     }
-
     listenStatus = listen(fd, 1);
 
     if(listenStatus < 0){
         perror("Listen: ");
         return FAIL;
     }
-
-    printf("Waiting on port %d for the other player to connect...", PORT);
-
     fdCon = accept(fd, NULL, NULL);
-
     return fdCon;
+}
 
+
+//Takes two int, convert them in char and send them to the other player 
+int send_attack(int row, int colum, int fdCon)  // --> returs error or OK code 
+{
+    int flag;
+    char crow = (char)row;
+    char ccolum = (char)colum;
+
+    printf("\nSending attack...\n");
+
+    int s1 = send(fdCon, &crow, sizeof(crow), 0);
+    int s2 = send(fdCon, &ccolum, sizeof(ccolum), 0);
+
+    if (s1 > 0 && s2 > 0)
+    {
+        flag = OK;
+    }else{
+        flag = FAIL;
+    }
+    return flag;
+}
+
+// Take a generic char ( rows or colums ), store it in a var, converts it and returns it
+int recv_char(int fdCon) // --> return code error if error and the data receved as a int if OK
+{
+    char chFromNet;
+    int flag;
+
+    printf("\nReceving response...\n");
+
+    int recved = recv(fdCon, &chFromNet, sizeof(chFromNet), 0);
+    fprintf(stderr, "recved: %d, char: %d\n", recved, (int)chFromNet); //? Debug
+    int dataFromNet = (int)chFromNet;
+
+    if (recved > 0)
+    {
+        flag = dataFromNet;
+    }else{
+        flag = recved;
+    }
+    return flag;
+}
+
+int send_status(int PersonalFD, int ris)
+{
+    char risChar = (char)ris;
+
+    int check = send(PersonalFD, &risChar, sizeof(risChar),0);
+
+    if (check == FAIL)
+    {
+        perror("Problems with the \"send_status\" func: " );
+    }
+    return check;
+}
+
+int game_loop(int player, int PersonalFD) // --> return code : 0 if in progress, 1 if player 1 wins, 2 if player 2 wins.
+{
+    int turno = 1;
+    while (celleRimanentiG1 != 0 && celleRimanentiG2 != 0)
+    {
+
+        sleep(TEMPO);
+        clean_up();
+        if (player == 1 && (turno % 2 == 1)) // Server attacks
+        {
+
+            printf("turno: %d\n", turno);
+
+            int row, colum;
+            printf("\n-----------------YOUR SHIPS-----------------\n\n");
+            print_board(boardG1M);
+            printf("\n--------------YOUR PREVIOUS MOVE--------------\n\n");
+            print_board(boardG1S);
+            do // taking input
+            {
+                printf("\nInsert the row (1 - 10 ): \n>");
+                scanf("%d", &row);
+                row--;
+                printf("\nInsert the colum ( 1 - 10 ): \n>");
+                scanf("%d", &colum);
+                colum--;
+            } while ((row < 0 || row > 10) || (colum < 0 || colum > 10));
+            int check = send_attack(row, colum, PersonalFD);
+            if (check == FAIL)
+            {   
+                perror("\nProblems with the \"send_attack\" func: " );
+            }
+            int ris = (recv_char(PersonalFD));
+
+            if (ris == 0)
+            {
+                printf("\nWater!\n");
+                boardG1S[row][colum] = 'O';
+            }else{
+                printf("\nHit!\n");
+                boardG1S[row][colum] = 'X';
+                scoreG1++;
+                celleRimanentiG2--;
+            }
+            turno++;
+        }
+        else if(player == 1 && (turno % 2 == 0)) // Server "defends"
+        {
+            printf("turno: %d\n", turno);
+
+            int row = recv_char(PersonalFD);
+            int colum = recv_char(PersonalFD);
+            
+            int ris = check_cell(boardG1M, row, colum);
+            if (ris == 1) // solo se mi hanno colpito faccio qualcosa, ovvero aggirono la mia main board
+            {
+                boardG1M[row][colum] = 'X';
+            }
+            int status_send = send_status(PersonalFD, ris);
+            if (status_send > 0)
+            {
+                //printf("\nMANDO %d byte STATO\n", status_send);  //? Debug
+                turno++;
+            }
+            
+            
+        }
+        else if(player == 2 && (turno % 2 == 0)) // client attacks
+        {
+            printf("turno: %d\n", turno);
+
+            int row,colum;
+            printf("\n-----------------YOUR SHIPS-----------------\n\n");
+            print_board(boardG2M);
+            printf("\n--------------YOUR PREVIOUS MOVE--------------\n\n");
+            print_board(boardG2S);
+            do // taking input
+            {
+                printf("\nInsert the row (1 - 10 ): \n>");
+                scanf("%d", &row);
+                row--;
+                printf("\nInsert the colum ( 1 - 10 ): \n>");
+                scanf("%d", &colum);
+                colum--;
+            } while ((row < 0 || row > 10) || (colum < 0 || colum > 10));
+            int check = send_attack(row, colum, PersonalFD);
+            if (check == FAIL)
+            {   
+                perror("\nProblems with the \"send_attack\" func: " );
+            }
+            int ris = (recv_char(PersonalFD));
+            if (ris == 0)
+            {
+                printf("\nWater!\n");
+                boardG2S[row][colum] = 'O';
+            }else{
+                printf("\nHit!\n");
+                boardG2S[row][colum] = 'X';
+                scoreG2++;
+                celleRimanentiG1--;
+            }
+            turno++;
+        }
+        else if (player == 2 && (turno % 2 == 1))
+        
+        {  // client "defends"
+            printf("turno: %d\n", turno);
+
+            fflush(stdout);
+            printf("\nWaiting coordinates...\n");
+            int row = recv_char(PersonalFD);
+            int colum = recv_char(PersonalFD);
+            
+            int ris = check_cell(boardG2M, row, colum);
+            if (ris == 1) // solo se mi hanno colpito faccio qualcosa, ovvero aggirono la mia main board
+            {
+                boardG2M[row][colum] = 'X';
+            }
+            int status_send = send_status(PersonalFD, ris);
+            if (status_send > 0)
+            {
+                //printf("\nMANDO %d byte STATO\n", status_send);  //? Debug
+                turno++;
+            }
+        }
+        
+    }
+    // check winner
+    int winner;
+    if (celleRimanentiG1 == 0)
+    {
+       winner = 2;
+    }else{
+        winner = 1;
+    }
+    return winner;
 }
