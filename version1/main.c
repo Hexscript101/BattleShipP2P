@@ -1,5 +1,5 @@
 /*
-    Authors: Luchetta Fabio, Leonardo Golisano, Edoardo Trifone
+    Authors: Luchetta Fabio 
     Start date : 3/06/2026
     Explanation: A peer-to-peer networked Battleship game written in C, 
     built on top of an existing local two-player implementation. 
@@ -8,48 +8,7 @@
     Useful links: https://github.com/Hexscript101/BattleShipP2P
 */
 
-// Libraries
-#include <unistd.h>
-#include <arpa/inet.h>
-#include <stdio.h>
-#include <sys/socket.h>
-#include <stdio.h>
-#include <stdbool.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-#include <unistd.h>
-#include <time.h>
-
 #include "functions.h"
-
-// Constants
-#define LIM 10          // Limit of the game board
-#define SHIPS_NUM 5     // Number of ships
-#define TOTAL_CELLS 16  // Sum of the cells of all ships
-#define TYPE2 2         // Number of the ships made by 2 cell 
-#define TEMPO 3         //? Da tenere ? 
-
-#define OK 0
-#define FAIL -1
-
-// Colors
-#define RESET "\033[0m"
-#define GRAY "\033[90m"
-
-// Global var
-char esemple[LIM][LIM] =  {0};
-char boardG1M[LIM][LIM] = {0}; // G1M = griglia giocatore 1 principale, dove verranno segnate le navi. S = griglia di appoggio mosse
-char boardG1S[LIM][LIM] = {0};
-char boardG2M[LIM][LIM] = {0};
-char boardG2S[LIM][LIM] = {0};
-char direzioni[4] = {'A', 'V', '<', '>'}; 
-
-int celleRimanentiG1 = TOTAL_CELLS;
-int celleRimanentiG2 = TOTAL_CELLS;
-int scoreG1 = 0;
-int scoreG2 = 0;
-
 
 int main(int argc, char *argv[])
 {
@@ -123,5 +82,3 @@ int main(int argc, char *argv[])
     }
     return OK;
 }
-
-
