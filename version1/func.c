@@ -18,8 +18,8 @@ char boardG2M[LIM][LIM] = {0};
 char boardG2S[LIM][LIM] = {0};
 char direzioni[4] = {'A', 'V', '<', '>'};
 
-int celleRimanentiG1 = TOTAL_CELLS;
-int celleRimanentiG2 = TOTAL_CELLS;
+int celleRimanentiG1 = TOTAL_SHIP_CELLS;
+int celleRimanentiG2 = TOTAL_SHIP_CELLS;
 int scoreG1 = 0;
 int scoreG2 = 0;
 
@@ -46,6 +46,35 @@ void print_board(char matr[LIM][LIM])
         for (size_t c = 0; c < LIM; c++)
         {
             if (matr[r][c] == '+' || matr[r][c] == 'A' || matr[r][c] == 'V' || matr[r][c] == '<' || matr[r][c] == '>'|| matr[r][c] == '?' )
+            {
+                printf(GRAY"|%c"RESET, matr[r][c]);
+            }
+            else
+            {
+                printf("|%c", matr[r][c]);
+            }
+        }
+        printf("\n");
+    }
+}
+
+void print_board_numbered(char matr[LIM][LIM])
+{
+    // Stampa intestazione colonne
+    printf("   ");
+    for (int c = 0; c < LIM; c++)
+    {
+        printf("%d ", c + 1);
+    }
+    printf("\n");
+
+    // Stampa board con numerazione righe
+    for (size_t r = 0; r < LIM; r++)
+    {
+        printf("%d ", (int)(r + 1));
+        for (size_t c = 0; c < LIM; c++)
+        {
+            if (matr[r][c] == '+' || matr[r][c] == 'A' || matr[r][c] == 'V' || matr[r][c] == '<' || matr[r][c] == '>'|| matr[r][c] == '?')
             {
                 printf(GRAY"|%c"RESET, matr[r][c]);
             }
@@ -133,7 +162,7 @@ void place_other(char matr[LIM][LIM], int dimShip)
 
 
             // Controllo in verticale tutte le celle per tutta la lunghezza della nave
-            for (int i = IpoR; i <= (IpoR+dimShip); i++)
+            for (int i = IpoR; i < (IpoR+dimShip); i++)
             {
                 if(matr[i][IpoC] != '~'){
                     flag = 1;
@@ -156,7 +185,7 @@ void place_other(char matr[LIM][LIM], int dimShip)
                 IpoC = rand() % 9;
                 IpoR = rand() % (9 - min + 1) + min;
                 
-                for (int i = IpoR; i >= (IpoR-dimShip); i--)
+                for (int i = IpoR; i > (IpoR-dimShip); i--)
                 {
                     if(matr[i][IpoC] != '~'){
                         flag = 1;
@@ -166,7 +195,7 @@ void place_other(char matr[LIM][LIM], int dimShip)
 
             matr[IpoR][IpoC] = 'V';
 
-            for (int i = IpoR-1; i > (IpoR-dimShip); i--)
+            for (int i = IpoR-1; i >= (IpoR-dimShip+1); i--)
             {
                 matr[i][IpoC] ='+';
             }
@@ -179,7 +208,7 @@ void place_other(char matr[LIM][LIM], int dimShip)
                 IpoR = rand() % 9;
                 IpoC = rand() % max;
 
-                for (int i = IpoC; i <= (IpoC+dimShip); i++)
+                for (int i = IpoC; i < (IpoC+dimShip); i++)
                 {
                     if(matr[IpoR][i] != '~'){
                         flag = 1;
@@ -202,7 +231,7 @@ void place_other(char matr[LIM][LIM], int dimShip)
                 IpoR = rand() % 9;
                 IpoC = rand() % (9 - min2 + 1) + min2;
 
-                for (int i = IpoC; i >= (IpoC-dimShip); i--)
+                for (int i = IpoC; i > (IpoC-dimShip); i--)
                 {
                     if(matr[IpoR][i] != '~'){
                         flag = 1;
@@ -385,18 +414,28 @@ int game_loop(int player, int PersonalFD) // --> return code : 0 if in progress,
 
             int row, colum;
             printf("\n-----------------YOUR SHIPS-----------------\n\n");
-            print_board(boardG1M);
+            print_board_numbered(boardG1M);
             printf("\n--------------YOUR PREVIOUS MOVE--------------\n\n");
-            print_board(boardG1S);
+            print_board_numbered(boardG1S);
             do // taking input
             {
                 printf("\nInsert the row (1 - 10 ): \n>");
-                scanf("%d", &row);
+                if (scanf("%d", &row) != 1) {
+                    int c;
+                    while ((c = getchar()) != '\n' && c != EOF);
+                    row = -1;
+                    continue;
+                }
                 row--;
                 printf("\nInsert the colum ( 1 - 10 ): \n>");
-                scanf("%d", &colum);
+                if (scanf("%d", &colum) != 1) {
+                    int c;
+                    while ((c = getchar()) != '\n' && c != EOF);
+                    colum = -1;
+                    continue;
+                }
                 colum--;
-            } while ((row < 0 || row > 10) || (colum < 0 || colum > 10));
+            } while ((row < 0 || row >= 10) || (colum < 0 || colum >= 10));
             int check = send_attack(row, colum, PersonalFD);
             if (check == FAIL)
             {   
@@ -416,26 +455,27 @@ int game_loop(int player, int PersonalFD) // --> return code : 0 if in progress,
             }
             turno++;
         }
-        else if(player == 1 && (turno % 2 == 0)) // Server "defends"
+        else if(player == 1 && (turno % 2 == 0)) // Server "defends" (receives P2's attack)
         {
             printf("turno: %d\n", turno);
 
             int row = recv_char(PersonalFD);
             int colum = recv_char(PersonalFD);
-            
+
             int ris = check_cell(boardG1M, row, colum);
             if (ris == 1) // solo se mi hanno colpito faccio qualcosa, ovvero aggirono la mia main board
             {
                 boardG1M[row][colum] = 'X';
             }
             int status_send = send_status(PersonalFD, ris);
-            if (status_send > 0)
+            turno++;
+            if (status_send <= 0)
             {
-                //printf("\nMANDO %d byte STATO\n", status_send);  //? Debug
-                turno++;
+                perror("Network error in defend phase");
+                return FAIL;
             }
-            
-            
+
+
         }
         else if(player == 2 && (turno % 2 == 0)) // client attacks
         {
@@ -443,18 +483,28 @@ int game_loop(int player, int PersonalFD) // --> return code : 0 if in progress,
 
             int row,colum;
             printf("\n-----------------YOUR SHIPS-----------------\n\n");
-            print_board(boardG2M);
+            print_board_numbered(boardG2M);
             printf("\n--------------YOUR PREVIOUS MOVE--------------\n\n");
-            print_board(boardG2S);
+            print_board_numbered(boardG2S);
             do // taking input
             {
                 printf("\nInsert the row (1 - 10 ): \n>");
-                scanf("%d", &row);
+                if (scanf("%d", &row) != 1) {
+                    int c;
+                    while ((c = getchar()) != '\n' && c != EOF);
+                    row = -1;
+                    continue;
+                }
                 row--;
                 printf("\nInsert the colum ( 1 - 10 ): \n>");
-                scanf("%d", &colum);
+                if (scanf("%d", &colum) != 1) {
+                    int c;
+                    while ((c = getchar()) != '\n' && c != EOF);
+                    colum = -1;
+                    continue;
+                }
                 colum--;
-            } while ((row < 0 || row > 10) || (colum < 0 || colum > 10));
+            } while ((row < 0 || row >= 10) || (colum < 0 || colum >= 10));
             int check = send_attack(row, colum, PersonalFD);
             if (check == FAIL)
             {   
@@ -489,10 +539,11 @@ int game_loop(int player, int PersonalFD) // --> return code : 0 if in progress,
                 boardG2M[row][colum] = 'X';
             }
             int status_send = send_status(PersonalFD, ris);
-            if (status_send > 0)
+            turno++;
+            if (status_send <= 0)
             {
-                //printf("\nMANDO %d byte STATO\n", status_send);  //? Debug
-                turno++;
+                perror("Network error in defend phase");
+                return FAIL;
             }
         }
         

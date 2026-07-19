@@ -50,7 +50,10 @@ int main(int argc, char *argv[])
         // il client sarà sempre il player 2
         title();
         printf("ip address:  (ex 192.169.1.1): \n>");
-        fgets(address, sizeof(address), stdin);
+        if (fgets(address, sizeof(address), stdin) == NULL) {
+            fprintf(stderr, "Error reading IP address\n");
+            return FAIL;
+        }
         address[strcspn(address, "\n")] = '\0';
         printf("Port: \n>");
         scanf("%d", &port);

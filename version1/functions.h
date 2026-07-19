@@ -24,7 +24,7 @@
 // Constants
 #define LIM 10
 #define SHIPS_NUM 5
-#define TOTAL_CELLS 16
+#define TOTAL_SHIP_CELLS 16
 #define TYPE2 2
 #define TEMPO 6
 #define PORT 4444
@@ -53,6 +53,7 @@ extern int scoreG2;
 void clean_up();
 void init_board(char matr[LIM][LIM]);
 void print_board(char matr[LIM][LIM]);
+void print_board_numbered(char matr[LIM][LIM]);
 void place_type2(char matr[LIM][LIM]);
 void place_other(char matr[LIM][LIM], int dimShip);
 void gen_ships(char matr[LIM][LIM]);
