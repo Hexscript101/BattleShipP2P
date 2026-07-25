@@ -279,6 +279,13 @@ void win(int playerVincitore)
     clean_up();
     printf("\n===========Player %d has won!=============\n", playerVincitore);
 }
+// Validazione IPv4
+bool validate_ipv4(const char* ip) {
+    int a, b, c, d;
+    if (sscanf(ip, "%d.%d.%d.%d", &a, &b, &c, &d) != 4) return false;
+    return (a >= 0 && a <= 255 && b >= 0 && b <= 255 && 
+            c >= 0 && c <= 255 && d >= 0 && d <= 255);
+}
 
 // --------------------------------------------------------------------------
 
