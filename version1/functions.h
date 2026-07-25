@@ -28,6 +28,7 @@
 #define TYPE2 2
 #define TEMPO 6
 #define PORT 4444
+#define IP_MAX_LEN 46
 
 #define OK 0
 #define FAIL -1
@@ -60,6 +61,7 @@ void gen_ships(char matr[LIM][LIM]);
 void title();
 int check_cell(char matr[LIM][LIM], int riga, int colonna);
 void win(int playerVincitore);
+bool validate_ipv4(const char* ip);
 
 // Network funcs
 int create_socket();

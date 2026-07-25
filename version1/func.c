@@ -64,14 +64,14 @@ void print_board_numbered(char matr[LIM][LIM])
     printf("   ");
     for (int c = 0; c < LIM; c++)
     {
-        printf("%d ", c + 1);
+        printf("%1d ", c + 1);
     }
     printf("\n");
 
     // Stampa board con numerazione righe
     for (size_t r = 0; r < LIM; r++)
     {
-        printf("%d ", (int)(r + 1));
+        printf("%2d ", (int)(r + 1));
         for (size_t c = 0; c < LIM; c++)
         {
             if (matr[r][c] == '+' || matr[r][c] == 'A' || matr[r][c] == 'V' || matr[r][c] == '<' || matr[r][c] == '>'|| matr[r][c] == '?')
@@ -278,6 +278,13 @@ void win(int playerVincitore)
 {
     clean_up();
     printf("\n===========Player %d has won!=============\n", playerVincitore);
+}
+// Validazione IPv4
+bool validate_ipv4(const char* ip) {
+    int a, b, c, d;
+    if (sscanf(ip, "%d.%d.%d.%d", &a, &b, &c, &d) != 4) return false;
+    return (a >= 0 && a <= 255 && b >= 0 && b <= 255 && 
+            c >= 0 && c <= 255 && d >= 0 && d <= 255);
 }
 
 // --------------------------------------------------------------------------

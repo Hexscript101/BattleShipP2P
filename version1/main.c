@@ -13,8 +13,6 @@
 int main(int argc, char *argv[])
 {
     srand(time(NULL));
-    char address[16];
-    int port;
     int winner;
     if (argc != 2)
     {
@@ -27,7 +25,7 @@ int main(int argc, char *argv[])
         int fdCon = set_up_server();
         if (fdCon == FAIL)
         {
-            fprintf(stderr, "SOCK ERROR");
+            fprintf(stderr, "SOCK ERROR\n");
             return FAIL;
         }
         title();
@@ -49,19 +47,22 @@ int main(int argc, char *argv[])
         /* if client */
         // il client sarà sempre il player 2
         title();
-        printf("ip address:  (ex 192.169.1.1): \n>");
+        char address[IP_MAX_LEN + 1];
+        printf("IP address: ");
         if (fgets(address, sizeof(address), stdin) == NULL) {
             fprintf(stderr, "Error reading IP address\n");
-            return FAIL;
+	        return FAIL;
         }
         address[strcspn(address, "\n")] = '\0';
-        printf("Port: \n>");
-        scanf("%d", &port);
-        getchar();
+
+        if (!validate_ipv4(address)) {
+            fprintf(stderr, "Invalid IPv4 address\n");
+            return FAIL;
+        }
 
         // Real start 
         int fd = create_socket();
-        int res = set_up_client(fd, port, address);
+        int res = set_up_client(fd, PORT, address);
         if (res == FAIL)
         {
             perror("sock: ");
@@ -79,7 +80,7 @@ int main(int argc, char *argv[])
         close(fd);
         
     }else{
-        printf("Bad usage: ./main <mod> ( See the README.md for more info )");
+        printf("Bad usage: ./main <mod> ( See the README.md for more info )\n");
         return FAIL;
     }
     return OK;
