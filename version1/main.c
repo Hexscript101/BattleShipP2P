@@ -13,8 +13,6 @@
 int main(int argc, char *argv[])
 {
     srand(time(NULL));
-    char address[46];  // margine per indirizzi IPv4/IPv6, non solo i 15 char minimi di IPv4
-    int port;
     int winner;
     if (argc != 2)
     {
@@ -61,11 +59,10 @@ int main(int argc, char *argv[])
             fprintf(stderr, "Invalid IPv4 address\n");
             return FAIL;
         }
-        getchar();
 
         // Real start 
         int fd = create_socket();
-        int res = set_up_client(fd, port, address);
+        int res = set_up_client(fd, PORT, address);
         if (res == FAIL)
         {
             perror("sock: ");

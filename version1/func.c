@@ -64,14 +64,14 @@ void print_board_numbered(char matr[LIM][LIM])
     printf("   ");
     for (int c = 0; c < LIM; c++)
     {
-        printf("%d ", c + 1);
+        printf("%1d ", c + 1);
     }
     printf("\n");
 
     // Stampa board con numerazione righe
     for (size_t r = 0; r < LIM; r++)
     {
-        printf("%d ", (int)(r + 1));
+        printf("%2d ", (int)(r + 1));
         for (size_t c = 0; c < LIM; c++)
         {
             if (matr[r][c] == '+' || matr[r][c] == 'A' || matr[r][c] == 'V' || matr[r][c] == '<' || matr[r][c] == '>'|| matr[r][c] == '?')
