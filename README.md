@@ -4,9 +4,7 @@ A peer-to-peer networked Battleship game written in C, built on top of an existi
 
 ## Authors
 
-- [Hexscript101](https://github.com/Hexscript101) 
-- [Edoelel](https://github.com/Edoelel)
-- [Toothbrush](https://github.com/Toothbrush)
+- [shrugg0](https://github.com/shrugg0) 
 
 ## Project Structure
  
